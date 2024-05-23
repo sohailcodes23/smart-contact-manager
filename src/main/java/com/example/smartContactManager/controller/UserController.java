@@ -18,10 +18,10 @@ public class UserController {
     @Autowired
     private UserDetailService userDetailService;
 
-    @GetMapping
-    private ResponseEntity test(Principal principal) {
-        System.out.println("ID " + principal.getName());
-        return ResponseEntity.ok(userDetailService.getCustomer(principal));
-    }
+//    @GetMapping
+//    private ResponseEntity test(Principal principal) {
+//        System.out.println("ID " + principal.getName());
+//        return ResponseEntity.ok(userDetailService.getCustomer(principal));
+//    }
 
 }

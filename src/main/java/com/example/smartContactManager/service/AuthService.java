@@ -9,7 +9,7 @@ import com.example.smartContactManager.entity.PrimaryUser;
 import com.example.smartContactManager.exceptions.AlreadyExistsException;
 import com.example.smartContactManager.exceptions.CustomException;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
-import com.example.smartContactManager.repository.CustomerRepository;
+import com.example.smartContactManager.repository.ContactRepository;
 import com.example.smartContactManager.repository.PrimaryUserlRepository;
 import com.example.smartContactManager.util.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class AuthService {
     private PrimaryUserlRepository primaryUserlRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private ContactRepository contactRepository;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -45,6 +45,7 @@ public class AuthService {
 
         PrimaryUser primaryUser = new PrimaryUser();
         primaryUser.setEmail(signupDto.getEmail());
+        primaryUser.setName(signupDto.getName());
         primaryUser.setPassword(passwordEncoder.encode(signupDto.getPassword()));
 
         primaryUserlRepository.save(primaryUser);

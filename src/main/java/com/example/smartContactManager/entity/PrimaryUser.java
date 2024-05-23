@@ -7,14 +7,15 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
-@SequenceGenerator(name = "primary_user_detail_seq", sequenceName = "primary_user_detail_seq", allocationSize = 1)
+@SequenceGenerator(name = "primary_user_seq", sequenceName = "primary_user_seq", allocationSize = 1)
 public class PrimaryUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_user_detail_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_user_seq")
     private Long id;
     private String email;
     private String name;
@@ -26,5 +27,8 @@ public class PrimaryUser {
     @LastModifiedDate
     private LocalDateTime modifiedDate;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "primaryUser")
+    private List<Contact> contacts;
 
 }

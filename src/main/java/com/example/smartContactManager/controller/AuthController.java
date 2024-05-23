@@ -1,7 +1,9 @@
 package com.example.smartContactManager.controller;
 
 import com.example.smartContactManager.dto.AuthResponse;
+import com.example.smartContactManager.dto.CommonMessage;
 import com.example.smartContactManager.dto.LoginDto;
+import com.example.smartContactManager.dto.SignupDto;
 import com.example.smartContactManager.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -22,6 +24,11 @@ public class AuthController {
     @PostMapping("login")
     private ResponseEntity<AuthResponse> login(@RequestBody LoginDto loginDto) {
         return ResponseEntity.ok(authService.login(loginDto));
+    }
+
+    @PostMapping("sign-up")
+    private ResponseEntity<CommonMessage> signUp(@RequestBody SignupDto loginDto) {
+        return ResponseEntity.ok(authService.signUp(loginDto));
     }
 
 }

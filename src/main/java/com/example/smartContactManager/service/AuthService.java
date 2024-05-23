@@ -2,15 +2,16 @@ package com.example.smartContactManager.service;
 
 import com.example.smartContactManager.config.security.JwtUtils;
 import com.example.smartContactManager.dto.AuthResponse;
+import com.example.smartContactManager.dto.CommonMessage;
 import com.example.smartContactManager.dto.LoginDto;
-import com.example.smartContactManager.entity.Customer;
-import com.example.smartContactManager.entity.PrimaryUserDetail;
+import com.example.smartContactManager.dto.SignupDto;
+import com.example.smartContactManager.entity.PrimaryUser;
+import com.example.smartContactManager.exceptions.AlreadyExistsException;
+import com.example.smartContactManager.exceptions.CustomException;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import com.example.smartContactManager.repository.CustomerRepository;
-import com.example.smartContactManager.repository.PrimaryUserDetailRepository;
+import com.example.smartContactManager.repository.PrimaryUserlRepository;
 import com.example.smartContactManager.util.MessageUtil;
-import com.example.smartContactManager.util.Role;
-import com.example.smartContactManager.util.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +25,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PrimaryUserDetailRepository primaryUserDetailRepository;
+    private PrimaryUserlRepository primaryUserlRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -32,36 +33,38 @@ public class AuthService {
     @Autowired
     private JwtUtils jwtUtils;
 
+    public CommonMessage signUp(SignupDto signupDto) {
+
+        if (primaryUserlRepository.existsByEmail(signupDto.getEmail())) {
+            throw new AlreadyExistsException("User");
+        }
+
+        if (!signupDto.getPassword().equals(signupDto.getConfirmPassword())) {
+            throw new CustomException("Password should be same as confirm password");
+        }
+
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setEmail(signupDto.getEmail());
+        primaryUser.setPassword(passwordEncoder.encode(signupDto.getPassword()));
+
+        primaryUserlRepository.save(primaryUser);
+
+
+        return new CommonMessage("Successful");
+    }
+
     public AuthResponse login(LoginDto loginDto) {
-        PrimaryUserDetail primaryUserDetail = primaryUserDetailRepository.findByUsernameAndStatus(loginDto.getUsername(), Status.ACTIVE.getValue())
+        PrimaryUser primaryUser = primaryUserlRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageUtil.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(loginDto.getPassword(), primaryUserDetail.getPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), primaryUser.getPassword())) {
             throw new BadCredentialsException("Invalid username or password.");
         }
 
-        Long userId = null;
-        Object data = null;
-
-        if (primaryUserDetail.getRole().equalsIgnoreCase(Role.CUSTOMER.getValue())) {
-//            data = iamObject.getCustomers().get(0);
-//            userId = iamObject.getCustomers().get(0).getId();
-        }
-        String token = jwtUtils.createToken(userId, Role.CUSTOMER.getValue());
+        Object data = primaryUser;
+        Long userId = primaryUser.getId();
+        String token = jwtUtils.createToken(userId);
         return new AuthResponse(token, data);
     }
 
-    public void registerCustomer(LoginDto loginDto) {
-
-        PrimaryUserDetail primaryUserDetail = new PrimaryUserDetail();
-        primaryUserDetail.setUsername(loginDto.getUsername());
-        primaryUserDetail.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-        primaryUserDetail.setRole(Role.CUSTOMER.getValue());
-        primaryUserDetail.setStatus(Status.ACTIVE.getValue());
-        primaryUserDetailRepository.save(primaryUserDetail);
-
-        Customer customer = new Customer();
-//        customer.setIamObject(iamObject);
-        customerRepository.save(customer);
-    }
 }

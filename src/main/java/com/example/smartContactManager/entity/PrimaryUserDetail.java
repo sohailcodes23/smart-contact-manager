@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
-public class UserDetail {
+@SequenceGenerator(name = "primary_user_detail_seq", sequenceName = "primary_user_detail_seq", allocationSize = 1)
+public class PrimaryUserDetail {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_user_detail_seq")
     private Long id;
     private String username;
     private String email;

@@ -3,7 +3,7 @@ package com.example.smartContactManager.service;
 import com.example.smartContactManager.config.security.JwtUtils;
 import com.example.smartContactManager.entity.Customer;
 import com.example.smartContactManager.repository.CustomerRepository;
-import com.example.smartContactManager.repository.UserDetailRepository;
+import com.example.smartContactManager.repository.PrimaryUserDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.security.Principal;
 public class UserDetailService {
 
     @Autowired
-    private UserDetailRepository userDetailRepository;
+    private PrimaryUserDetailRepository primaryUserDetailRepository;
 
     @Autowired
     private CustomerRepository customerRepository;

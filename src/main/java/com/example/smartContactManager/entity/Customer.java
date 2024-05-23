@@ -23,5 +23,5 @@ public class Customer {
     // Creating OneToOne relation bcz each user detail has exactly one role.
     // Each userDetail is associated with exactly one role, maintaining data integrity and clarity in the system.
     @OneToOne
-    private UserDetail userDetail;
+    private PrimaryUserDetail primaryUserDetail;
 }

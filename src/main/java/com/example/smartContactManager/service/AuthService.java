@@ -4,10 +4,10 @@ import com.example.smartContactManager.config.security.JwtUtils;
 import com.example.smartContactManager.dto.AuthResponse;
 import com.example.smartContactManager.dto.LoginDto;
 import com.example.smartContactManager.entity.Customer;
-import com.example.smartContactManager.entity.UserDetail;
+import com.example.smartContactManager.entity.PrimaryUserDetail;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import com.example.smartContactManager.repository.CustomerRepository;
-import com.example.smartContactManager.repository.UserDetailRepository;
+import com.example.smartContactManager.repository.PrimaryUserDetailRepository;
 import com.example.smartContactManager.util.MessageUtil;
 import com.example.smartContactManager.util.Role;
 import com.example.smartContactManager.util.Status;
@@ -24,7 +24,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserDetailRepository userDetailRepository;
+    private PrimaryUserDetailRepository primaryUserDetailRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -33,17 +33,17 @@ public class AuthService {
     private JwtUtils jwtUtils;
 
     public AuthResponse login(LoginDto loginDto) {
-        UserDetail userDetail = userDetailRepository.findByUsernameAndStatus(loginDto.getUsername(), Status.ACTIVE.getValue())
+        PrimaryUserDetail primaryUserDetail = primaryUserDetailRepository.findByUsernameAndStatus(loginDto.getUsername(), Status.ACTIVE.getValue())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageUtil.USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(loginDto.getPassword(), userDetail.getPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), primaryUserDetail.getPassword())) {
             throw new BadCredentialsException("Invalid username or password.");
         }
 
         Long userId = null;
         Object data = null;
 
-        if (userDetail.getRole().equalsIgnoreCase(Role.CUSTOMER.getValue())) {
+        if (primaryUserDetail.getRole().equalsIgnoreCase(Role.CUSTOMER.getValue())) {
 //            data = iamObject.getCustomers().get(0);
 //            userId = iamObject.getCustomers().get(0).getId();
         }
@@ -53,12 +53,12 @@ public class AuthService {
 
     public void registerCustomer(LoginDto loginDto) {
 
-        UserDetail userDetail = new UserDetail();
-        userDetail.setUsername(loginDto.getUsername());
-        userDetail.setPassword(passwordEncoder.encode(loginDto.getPassword()));
-        userDetail.setRole(Role.CUSTOMER.getValue());
-        userDetail.setStatus(Status.ACTIVE.getValue());
-        userDetailRepository.save(userDetail);
+        PrimaryUserDetail primaryUserDetail = new PrimaryUserDetail();
+        primaryUserDetail.setUsername(loginDto.getUsername());
+        primaryUserDetail.setPassword(passwordEncoder.encode(loginDto.getPassword()));
+        primaryUserDetail.setRole(Role.CUSTOMER.getValue());
+        primaryUserDetail.setStatus(Status.ACTIVE.getValue());
+        primaryUserDetailRepository.save(primaryUserDetail);
 
         Customer customer = new Customer();
 //        customer.setIamObject(iamObject);

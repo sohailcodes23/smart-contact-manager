@@ -4,6 +4,8 @@ package com.example.smartContactManager;
 import com.example.smartContactManager.dto.CommonError;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +27,12 @@ public class RestAdvice {
             validErrors.add(objectError.getDefaultMessage());
         }
         return validErrors;
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<CommonError> invalidInput(BindException e) {
+        BindingResult result = e.getBindingResult();
+        return ResponseEntity.status(500).body(new CommonError(fromBindingErrors(result)));
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,5 +1,6 @@
 package com.example.smartContactManager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ public class Contact {
     private Integer mobile;
     private Integer workMobile;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "primary_user_id", nullable = false)
     private PrimaryUser primaryUser;

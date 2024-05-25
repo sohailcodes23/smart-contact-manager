@@ -11,7 +11,6 @@ import com.example.smartContactManager.exceptions.CustomException;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import com.example.smartContactManager.repository.ContactRepository;
 import com.example.smartContactManager.repository.PrimaryUserlRepository;
-import com.example.smartContactManager.util.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,7 +55,7 @@ public class AuthService {
 
     public AuthResponse login(LoginDto loginDto) {
         PrimaryUser primaryUser = primaryUserlRepository.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageUtil.USER_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
 
         if (!passwordEncoder.matches(loginDto.getPassword(), primaryUser.getPassword())) {
             throw new BadCredentialsException("Invalid username or password.");

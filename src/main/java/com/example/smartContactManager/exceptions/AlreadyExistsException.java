@@ -11,7 +11,7 @@ public class AlreadyExistsException extends RuntimeException {
     List<String> errors = new ArrayList<>();
 
     public AlreadyExistsException(String exception) {
-        super(exception+" already exists");
-        this.errors.add(exception+" already exists");
+        super(exception + " already exists");
+        this.errors.add(exception + " already exists");
     }
 }

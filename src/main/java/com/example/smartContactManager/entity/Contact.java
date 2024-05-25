@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@SequenceGenerator(name = "contact_seq", sequenceName = "contact_seq", allocationSize = 1) 
+@SequenceGenerator(name = "contact_seq", sequenceName = "contact_seq", allocationSize = 1)
 public class Contact {
 
     @Id
@@ -18,6 +18,6 @@ public class Contact {
     private Integer workMobile;
 
     @ManyToOne
-    @JoinColumn(name="primary_user_id", nullable=false)
+    @JoinColumn(name = "primary_user_id", nullable = false)
     private PrimaryUser primaryUser;
 }

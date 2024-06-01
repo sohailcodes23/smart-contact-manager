@@ -1,6 +1,7 @@
 package com.example.smartContactManager.config.security;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.smartContactManager.util.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,17 +10,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -36,7 +33,7 @@ class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized.");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized Access");
         PrintWriter writer = response.getWriter();
         writer.println("Access Denied !! " + authException.getMessage());
     }
@@ -76,57 +73,6 @@ class JwtAuthenticationToken extends AbstractAuthenticationToken {
     }
 }
 
-@AllArgsConstructor
-class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        resolveHeader(request).ifPresent(this::setSecurityContext);
-        chain.doFilter(request, response);
-    }
-
-    private Optional<JwtAuthenticationToken> resolveHeader(HttpServletRequest request) {
-        String headerValue = request.getHeader("Authorization");
-        System.out.println("HEADER " + headerValue);
-        if (headerValue != null && headerValue.startsWith("Bearer ")) {
-            String tokenValue = headerValue.substring(7);
-            JwtAuthenticationToken token = new JwtAuthenticationToken(tokenValue);
-            return Optional.of(token);
-        }
-
-        return Optional.empty();
-    }
-
-    private void setSecurityContext(Authentication authentication) {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
-    }
-}
-
-@AllArgsConstructor
-class JwtAuthenticationProvider implements AuthenticationProvider {
-    private final JwtUtils jwtUtils;
-
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        try {
-            String token = ((String) authentication.getCredentials());
-            DecodedJWT jwt = jwtUtils.verify(token);
-            return new JwtAuthenticationToken(
-                    Long.parseLong(jwt.getSubject()),
-                    Collections.singletonList(new SimpleGrantedAuthority(jwt.getClaim("role").asString())));
-        } catch (Exception e) {
-            throw new BadCredentialsException(e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean supports(Class<?> aClass) {
-        return JwtAuthenticationToken.class.isAssignableFrom(aClass);
-    }
-}
-
 
 @Configuration
 @EnableWebSecurity
@@ -153,6 +99,8 @@ public class SecurityConfig {
     };
 
 
+    private final JwtUtils jwtUtils;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -162,14 +110,49 @@ public class SecurityConfig {
                 })
                 .authorizeRequests()
                 .requestMatchers(WHITELIST_URLS).permitAll()
-                .requestMatchers("/general/current-user").hasRole("ADMIN")
-                .requestMatchers("/general/user").permitAll()
+                .requestMatchers("/contacts/**").hasRole(Role.PRIMARY_USER.getValue())
                 .anyRequest()
                 .authenticated()
                 .and().exceptionHandling(ex -> ex.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class);
 
-        http.addFilterBefore(new JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+}
+
+class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtUtils jwtUtils;
+
+    public JwtAuthenticationFilter(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
+
+    private Optional<JwtAuthenticationToken> resolveHeader(HttpServletRequest request) {
+        String headerValue = request.getHeader("Authorization");
+        if (headerValue != null && headerValue.startsWith("Bearer ")) {
+            String tokenValue = headerValue.substring(7);
+            try {
+                DecodedJWT jwt = jwtUtils.verify(tokenValue);
+                Long userId = Long.parseLong(jwt.getSubject());
+                String role = "ROLE_" + jwt.getClaim("role").asString();//IMP Spring security check if the role start from 'ROLE_'
+                return Optional.of(new JwtAuthenticationToken(userId, Collections.singletonList(new SimpleGrantedAuthority(role))));
+            } catch (Exception e) {
+                logger.error("Error verifying JWT token", e); // Add logging for debugging
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        Optional<JwtAuthenticationToken> token = resolveHeader(request);
+        if (token.isPresent() && token.get().isAuthenticated()) {
+            SecurityContextHolder.getContext().setAuthentication(token.get());
+        }
+        filterChain.doFilter(request, response);
     }
 }

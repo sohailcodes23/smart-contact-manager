@@ -63,7 +63,7 @@ public class AuthService {
 
         Object data = primaryUser;
         Long userId = primaryUser.getId();
-        String token = jwtUtils.createToken(userId);
+        String token = jwtUtils.createToken(userId, null);
         return new AuthResponse(token, data);
     }
 

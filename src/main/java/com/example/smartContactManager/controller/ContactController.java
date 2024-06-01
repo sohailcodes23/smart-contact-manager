@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
-@RestController()
+@RestController
 @RequestMapping("contacts")
 public class ContactController {
 

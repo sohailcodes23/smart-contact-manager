@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.smartContactManager.util.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
@@ -18,14 +19,18 @@ public class JwtUtils {
     private final Algorithm algorithm;
     private final JwtProps jwtProps;
 
-    public String createToken(Long userId) {
-        Date expiresAt = getDateAfter(Calendar.MONTH, 1);
+    public String createToken(Long userId, String role) {
+        if (role == null) {
+            role = Role.PRIMARY_USER.getValue();
+        }
+        Date expiresAt = getDateAfter(Calendar.YEAR, 1);
         return JWT.create()
                 .withSubject(String.valueOf(userId))
                 .withIssuer(jwtProps.getIssuer())
                 .withIssuedAt(new Date())
                 .withExpiresAt(expiresAt)
                 .withClaim("id", userId)
+                .withClaim("role", role)
                 .sign(algorithm);
     }
 

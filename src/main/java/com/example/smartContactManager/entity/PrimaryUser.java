@@ -15,7 +15,7 @@ import java.util.List;
 public class PrimaryUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_user_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "primary_user_seq")
     private Long id;
     private String email;
     private String name;

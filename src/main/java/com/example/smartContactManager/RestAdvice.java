@@ -2,6 +2,7 @@ package com.example.smartContactManager;
 
 
 import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.smartContactManager.dto.CommonError;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,12 @@ public class RestAdvice {
 
     @ExceptionHandler(SignatureVerificationException.class)
     public ResponseEntity<CommonError> signatureVerificationException(SignatureVerificationException e) {
+        return ResponseEntity.status(401).body(new CommonError(Arrays.asList("Invalid User")));
+    }
 
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<CommonError> tokenExpiredException(TokenExpiredException e) {
         return ResponseEntity.status(401).body(new CommonError(Arrays.asList("Invalid User")));
     }
 

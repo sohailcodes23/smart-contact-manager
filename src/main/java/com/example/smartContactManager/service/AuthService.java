@@ -10,7 +10,7 @@ import com.example.smartContactManager.exceptions.AlreadyExistsException;
 import com.example.smartContactManager.exceptions.CustomException;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import com.example.smartContactManager.repository.ContactRepository;
-import com.example.smartContactManager.repository.PrimaryUserlRepository;
+import com.example.smartContactManager.repository.PrimaryUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +24,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PrimaryUserlRepository primaryUserlRepository;
+    private PrimaryUserRepository primaryUserRepository;
 
     @Autowired
     private ContactRepository contactRepository;
@@ -34,7 +34,7 @@ public class AuthService {
 
     public CommonMessage signUp(SignupDto signupDto) {
 
-        if (primaryUserlRepository.existsByEmail(signupDto.getEmail())) {
+        if (primaryUserRepository.existsByEmail(signupDto.getEmail())) {
             throw new AlreadyExistsException("User");
         }
 
@@ -47,14 +47,14 @@ public class AuthService {
         primaryUser.setName(signupDto.getName());
         primaryUser.setPassword(passwordEncoder.encode(signupDto.getPassword()));
 
-        primaryUserlRepository.save(primaryUser);
+        primaryUserRepository.save(primaryUser);
 
 
         return new CommonMessage("Successful");
     }
 
     public AuthResponse login(LoginDto loginDto) {
-        PrimaryUser primaryUser = primaryUserlRepository.findByEmail(loginDto.getEmail())
+        PrimaryUser primaryUser = primaryUserRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User"));
 
         if (!passwordEncoder.matches(loginDto.getPassword(), primaryUser.getPassword())) {

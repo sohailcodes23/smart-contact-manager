@@ -34,8 +34,6 @@ public class ContactService {
     public void save(Contact contact, Principal principal) {
         PrimaryUser primaryUser = primaryUserService.findPrimaryUserByPrincipal(principal);
         contact.setPrimaryUser(primaryUser);
-
-
         contactRepository.save(contact);
     }
 

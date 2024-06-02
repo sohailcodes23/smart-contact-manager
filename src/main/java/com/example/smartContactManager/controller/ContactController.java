@@ -3,6 +3,7 @@ package com.example.smartContactManager.controller;
 
 import com.example.smartContactManager.entity.Contact;
 import com.example.smartContactManager.service.ContactService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +30,11 @@ public class ContactController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody Contact contact, Principal principal) {
+    public ResponseEntity<?> save(@RequestBody @Valid Contact contact, Principal principal) {
 
         contactService.save(contact, principal);
 
-        return ResponseEntity.created(null).build();
+        return ResponseEntity.status(201).build();
     }
 
     @PutMapping

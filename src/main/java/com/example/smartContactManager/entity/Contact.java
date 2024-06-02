@@ -21,8 +21,7 @@ public class Contact {
     private String email;
 
     @NotNull(message = "Mobile No. should not be null")
-    @Min(value = 10, message = "Invalid no")
-    @Max(value = 10, message = "Invalid no")
+    @Min(value = 10, message = "It should be minimum 10 numbers")
     private String mobileNo;
 
     private String workMobileNo;

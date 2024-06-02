@@ -9,13 +9,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -25,7 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -36,40 +33,6 @@ class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized Access");
         PrintWriter writer = response.getWriter();
         writer.println("Access Denied !! " + authException.getMessage());
-    }
-}
-
-class JwtAuthenticationToken extends AbstractAuthenticationToken {
-    private final Long subject;
-    private final String token;
-
-    private JwtAuthenticationToken(
-            String token,
-            Long subject,
-            Collection<? extends GrantedAuthority> authorities,
-            boolean isAuthenticated) {
-        super(authorities);
-        this.token = token;
-        this.subject = subject;
-        setAuthenticated(isAuthenticated);
-    }
-
-    public JwtAuthenticationToken(String token) {
-        this(token, null, null, false);
-    }
-
-    public JwtAuthenticationToken(Long subject, Collection<? extends GrantedAuthority> authorities) {
-        this(null, subject, authorities, true);
-    }
-
-    @Override
-    public Object getCredentials() {
-        return token;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return subject;
     }
 }
 

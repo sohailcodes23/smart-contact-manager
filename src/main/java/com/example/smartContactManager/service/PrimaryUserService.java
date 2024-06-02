@@ -1,11 +1,15 @@
 package com.example.smartContactManager.service;
 
+import com.example.smartContactManager.config.security.JwtAuthenticationToken;
 import com.example.smartContactManager.config.security.JwtUtils;
 import com.example.smartContactManager.entity.PrimaryUser;
 import com.example.smartContactManager.exceptions.ResourceNotFoundException;
 import com.example.smartContactManager.repository.ContactRepository;
 import com.example.smartContactManager.repository.PrimaryUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -30,7 +34,22 @@ public class PrimaryUserService {
         if (primaryUser.isEmpty()) {
             throw new ResourceNotFoundException("User");
         }
-        System.out.println("USER "+primaryUser.get().getId());
         return primaryUser.get();
+    }
+
+    public PrimaryUser findById(Long userId) {
+        return primaryUserRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User"));
+    }
+
+    public PrimaryUser getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+            JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+            Long userId = jwtAuthenticationToken.getPrincipal() != null ? (Long) jwtAuthenticationToken.getPrincipal() : null;
+            System.out.println("CURRENT USERID " + userId);
+            return findById(userId);
+        }
+        return null;
     }
 }

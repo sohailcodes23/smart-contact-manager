@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,37 +18,37 @@ public class ContactController {
     ContactService contactService;
 
     @GetMapping
-    public ResponseEntity<List<Contact>> findAll(Principal principal) {
-        return ResponseEntity.ok(contactService.findAll(principal));
+    public ResponseEntity<List<Contact>> findAll() {
+        return ResponseEntity.ok(contactService.findAll());
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Contact> findById(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<Contact> findById(@PathVariable Long id) {
 
-        return ResponseEntity.ok(contactService.findById(id, principal));
+        return ResponseEntity.ok(contactService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody @Valid Contact contact, Principal principal) {
+    public ResponseEntity<Void> save(@RequestBody @Valid Contact contact) {
 
-        contactService.save(contact, principal);
+        contactService.save(contact);
 
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody Contact contact, Principal principal) {
+    public ResponseEntity<Void> update(@RequestBody Contact contact) {
 
-        contactService.update(contact, principal);
+        contactService.update(contact);
 
         return ResponseEntity.ok().build();
     }
 
 
     @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteById(@PathVariable Long id, Principal principal) {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
 
-        contactService.deleteById(id, principal);
+        contactService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
